@@ -1,0 +1,51 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: "Solicitudes"
+  devtools:
+    add-properties: false
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-}] %logger{36} - %msg%n"
+management:
+  r2dbc:
+    url: "r2dbc:postgresql://${adapters.r2dbc.postgresql.host}:${adapters.r2dbc.postgresql.port}/${adapters.r2dbc.postgresql.database}"
+    username: "${adapters.r2dbc.postgresql.username}"
+    password: "${adapters.r2dbc.postgresql.password}"
+  profiles:
+    include: null
+adapters:
+  r2dbc:
+    postgresql:
+      host: "${DB_HOST:localhost}"
+      port: "${DB_PORT:5432}"
+      database: "${DB_NAME:solicitudes}"
+      schema: "${DB_SCHEMA:public}"
+      username: "${DB_USER:solicitudes_user}"
+      password: "${DB_PASSWORD:pass_solicitudes}"
+      initial-size: "${DB_POOL_INITIAL_SIZE:5}"
+      max-size: "${DB_POOL_MAX_SIZE:10}"
+      max-idle-time-minutes: "${DB_POOL_MAX_IDLE:30}"
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+app:
+  usuario-service:
+    url: "${USUARIO_SERVICE_URL:http://localhost:8080}"
+
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8081"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  show-actuator: true
