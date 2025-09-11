@@ -1,9 +1,9 @@
 package co.com.crediya.model;
 
-public class Usuario {
+public class User {
     private final String email;
     
-    public Usuario(String email) {
+    public User(String email) {
         this.email = email;
     }
     

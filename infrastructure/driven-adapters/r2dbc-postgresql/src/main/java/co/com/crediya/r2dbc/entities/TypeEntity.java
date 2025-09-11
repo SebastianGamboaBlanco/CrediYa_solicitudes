@@ -13,9 +13,9 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Builder
 @Table("tipo_prestamo")
-public class TipoPrestamoEntity {
+public class TypeEntity {
     
     @Id
     @Column("id_tipo_prestamo")
-    private Integer idTipoPrestamo;
+    private Integer typeId;
 }

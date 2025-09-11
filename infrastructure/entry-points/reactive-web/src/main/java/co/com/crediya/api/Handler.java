@@ -1,13 +1,12 @@
 package co.com.crediya.api;
 
-import co.com.crediya.api.dto.RegistrarSolicitudRequest;
-import co.com.crediya.api.dto.RegistrarSolicitudResponse;
-import co.com.crediya.api.dto.SolicitudDTOMapper;
+import co.com.crediya.api.dto.ApplicationRequest;
+import co.com.crediya.api.dto.ApplicationResponse;
+import co.com.crediya.api.dto.ApplicationDTOMapper;
 import co.com.crediya.api.exception.ErrorHandler;
-import co.com.crediya.api.processor.SolicitudProcessor;
+import co.com.crediya.api.processor.ApplicationProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -19,23 +18,21 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class Handler {
     
-    private final SolicitudProcessor solicitudProcessor;
+    private final ApplicationProcessor applicationProcessor;
     private final ErrorHandler errorHandler;
 
-    public Mono<ServerResponse> registrarSolicitud(ServerRequest serverRequest) {
-        log.info("=== INICIANDO REGISTRO DE SOLICITUD ===");
+    public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
+        log.info("=== STARTING LOAN APPLICATION REGISTRATION ===");
         
-        return serverRequest.bodyToMono(RegistrarSolicitudRequest.class)
-                .doOnNext(request -> log.info("Request recibido: doc={}, monto={}, plazo={}, tipoPrestamo={}", 
-                        request.getDocumentoIdentidad(), request.getMonto(), request.getPlazo(), request.getIdTipoPrestamo()))
-                .flatMap(solicitudProcessor::procesarSolicitud)
+        return serverRequest.bodyToMono(ApplicationRequest.class)
+                .doOnNext(request -> log.info("Request received: doc={}, amount={}, term={}, loanType={}", 
+                        request.getIdentityDocument(), request.getAmount(), request.getTermMonths(), request.getTypeId()))
+                .flatMap(applicationProcessor::processApplication)
                 .flatMap(response -> {
-                    RegistrarSolicitudResponse resul = SolicitudDTOMapper.toResponse(200, response);
-                    HttpStatus status = HttpStatus.OK;
-                    return ServerResponse.status(status)
+                    ApplicationResponse result = ApplicationDTOMapper.toSuccessResponse(response);
+                    return ServerResponse.ok()
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(resul);
-
+                            .bodyValue(result);
                 })
                 .onErrorResume(errorHandler::handleError);
 

@@ -15,24 +15,24 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Table("solicitud")
-public class SolicitudEntity {
+public class ApplicationEntity {
     
     @Id
     @Column("id_solicitud")
-    private Integer idSolicitud;
+    private Integer ApplicationId;
     
     @Column("monto")
-    private BigDecimal monto;
+    private BigDecimal amount;
     
     @Column("plazo")
-    private Integer plazo;
+    private Integer termMonths;
     
     @Column("email")
     private String email;
     
     @Column("id_estado")
-    private Integer idEstado;
+    private Integer statusId;
     
     @Column("id_tipo_prestamo")
-    private Integer idTipoPrestamo;
+    private Integer typeId;
 }

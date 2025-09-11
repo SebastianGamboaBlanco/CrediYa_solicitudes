@@ -23,7 +23,7 @@ public class ValidationUtil {
     private final Validator validator;
     
     public <T> Mono<T> validateRequest(T object) {
-        log.debug("Iniciando validación Bean Validation para objeto: {}", object.getClass().getSimpleName());
+        log.debug("Starting Bean Validation for object: {}", object.getClass().getSimpleName());
         
         Set<ConstraintViolation<T>> violations = validator.validate(object);
         
@@ -32,15 +32,15 @@ public class ValidationUtil {
                 .filter(violation -> violation != null)
                 .map(violation -> {
                     try {
-                        String campo = Objects.isNull(violation.getPropertyPath()) ? "unknown" : violation.getPropertyPath().toString();
-                        String mensaje = Objects.isNull(violation.getMessage()) ? "Error de validación" : violation.getMessage();
-                        String valor = Objects.isNull(violation.getInvalidValue()) ? "" : violation.getInvalidValue().toString();
+                        String field = Objects.isNull(violation.getPropertyPath()) ? "unknown" : violation.getPropertyPath().toString();
+                        String message = Objects.isNull(violation.getMessage()) ? "Validation error" : violation.getMessage();
+                        String value = Objects.isNull(violation.getInvalidValue()) ? "" : violation.getInvalidValue().toString();
                         
-                        log.debug("Creando tupla - Campo: '{}', Mensaje: '{}', Valor: '{}'", campo, mensaje, valor);
-                        return Tuples.of(campo, mensaje, valor);
+                        log.debug("Creating tuple - Field: '{}', Message: '{}', Value: '{}'", field, message, value);
+                        return Tuples.of(field, message, value);
                     } catch (Exception e) {
-                        log.error("Error procesando violación: {}", e.getMessage(), e);
-                        return Tuples.of("unknown", "Error de validación", "");
+                        log.error("Error processing violation: {}", e.getMessage(), e);
+                        return Tuples.of("unknown", "Validation error", "");
                     }
                 })
                 .collect(Collectors.toList());
@@ -49,11 +49,11 @@ public class ValidationUtil {
                 .map(tuple -> tuple.getT1() + ": " + tuple.getT2())
                 .collect(Collectors.joining(", "));
             
-            log.debug("Errores de validación encontrados: {}", errorMessage);
+            log.debug("Validation errors found: {}", errorMessage);
             return Mono.error(new MultipleValidationException(errors));
         }
         
-        log.debug("Validación exitosa para objeto: {}", object.getClass().getSimpleName());
+        log.debug("Successful validation for object: {}", object.getClass().getSimpleName());
         return Mono.just(object);
     }
 }

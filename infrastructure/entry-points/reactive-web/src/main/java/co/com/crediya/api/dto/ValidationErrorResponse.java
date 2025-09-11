@@ -1,5 +1,6 @@
 package co.com.crediya.api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,14 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Schema(description = "Validation error response with specific details per field")
 public class ValidationErrorResponse {
 
+    @Schema(description = "Response code", example = "1")
+    private Integer code;
 
-    private String status;
-
-
-    private List<FieldError> errores;
+    @Schema(description = "List of validation errors per field")
+    private List<FieldError> errors;
 
     public static ValidationErrorResponse from(List<Tuple3<String, String, String>> validationErrors) {
         List<FieldError> fieldErrors = validationErrors.stream()
@@ -32,6 +33,6 @@ public class ValidationErrorResponse {
                 ))
                 .collect(Collectors.toList());
 
-        return new ValidationErrorResponse("400", fieldErrors);
+        return new ValidationErrorResponse(1, fieldErrors);
     }
 }

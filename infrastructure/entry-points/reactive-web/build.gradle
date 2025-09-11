@@ -5,6 +5,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:context-propagation:1.1.2'
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.2.0'
 }

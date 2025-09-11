@@ -1,0 +1,20 @@
+package co.com.crediya.model.exceptions;
+
+public enum ErrorType {
+    USER_NOT_FOUND("User not found with the provided document"),
+    INVALID_LOAN_TYPE("The loan type does not exist or is not available"),
+    INVALID_DATA("The provided data is not valid"),
+    APPLICATION_ERROR("Error processing the application"),
+    REQUIRED_FIELD("Required Field"),
+    INVALID_FIELD("Invalid field");
+    
+    private final String message;
+    
+    ErrorType(String message) {
+        this.message = message;
+    }
+    
+    public String getMessage() {
+        return message;
+    }
+}
