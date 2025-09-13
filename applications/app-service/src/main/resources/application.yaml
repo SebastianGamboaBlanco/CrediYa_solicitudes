@@ -10,6 +10,8 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{X-FLOW-ID:-}] %logger{10} - %msg%n"
   profiles:
     include: null
+  level:
+    org.springframework.boot.autoconfigure.security: WARN
   r2dbc:
     url: "r2dbc:postgresql://${adapters.r2dbc.postgresql.host}:${adapters.r2dbc.postgresql.port}/${adapters.r2dbc.postgresql.database}"
     username: "${adapters.r2dbc.postgresql.username}"
@@ -38,6 +40,8 @@ adapters:
 app:
   user-service:
     url: "${USER_SERVICE_URL:http://localhost:8080}"
+  jwt:
+    secret: "crediya-jwt-secret-key-change-in-production-environment-with-minimum-256-bits-for-security"
 
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8081"

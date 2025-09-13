@@ -5,6 +5,7 @@ import co.com.crediya.api.dto.ApplicationResponse;
 import co.com.crediya.api.dto.ApplicationDTOMapper;
 import co.com.crediya.api.exception.ErrorHandler;
 import co.com.crediya.api.processor.ApplicationProcessor;
+import co.com.crediya.api.dto.JwtUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -24,10 +25,15 @@ public class Handler {
     public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
         log.info("=== STARTING LOAN APPLICATION REGISTRATION ===");
         
+        // Extraer JwtUserInfo que fue almacenado por JwtAuthenticationWebFilter
+        // El filtro garantiza que userInfo nunca será null para endpoints protegidos
+        JwtUserInfo userInfo = (JwtUserInfo) serverRequest.exchange().getAttribute("jwtUserInfo");
+        
         return serverRequest.bodyToMono(ApplicationRequest.class)
-                .doOnNext(request -> log.info("Request received: doc={}, amount={}, term={}, loanType={}", 
-                        request.getIdentityDocument(), request.getAmount(), request.getTermMonths(), request.getTypeId()))
-                .flatMap(applicationProcessor::processApplication)
+                .doOnNext(request -> log.info("Request received: doc={}, amount={}, term={}, loanType={} from authenticated user: {}", 
+                        request.getIdentityDocument(), request.getAmount(), request.getTermMonths(), 
+                        request.getTypeId(), userInfo.getEmail()))
+                .flatMap(request -> applicationProcessor.processApplication(request, userInfo))
                 .flatMap(response -> {
                     ApplicationResponse result = ApplicationDTOMapper.toSuccessResponse(response);
                     return ServerResponse.ok()
@@ -35,6 +41,5 @@ public class Handler {
                             .bodyValue(result);
                 })
                 .onErrorResume(errorHandler::handleError);
-
     }
 }

@@ -21,16 +21,24 @@ public class ApplicationResponse {
     @Schema(description = "Descriptive message of the operation result", 
             example = "Pending review")
     private String message;
+    
+    @Schema(description = "Trace ID for error tracking", 
+            example = "550e8400-e29b-41d4-a716-446655440000")
+    private String traceId;
 
     public static ApplicationResponse success(String message) {
-        return new ApplicationResponse(0, message);
+        return new ApplicationResponse(0, message, null);
     }
 
     public static ApplicationResponse error(String message) {
-        return new ApplicationResponse(1, message);
+        return new ApplicationResponse(1, message, null);
+    }
+    
+    public static ApplicationResponse error(String message, String traceId) {
+        return new ApplicationResponse(1, message, traceId);
     }
 
-    public static ApplicationResponse internalError(String message) {
-        return new ApplicationResponse(1, message);
+    public static ApplicationResponse internalError(String message, String traceId) {
+        return new ApplicationResponse(1, message, traceId);
     }
 }

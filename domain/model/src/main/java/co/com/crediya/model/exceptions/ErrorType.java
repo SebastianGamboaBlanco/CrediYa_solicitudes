@@ -6,7 +6,11 @@ public enum ErrorType {
     INVALID_DATA("The provided data is not valid"),
     APPLICATION_ERROR("Error processing the application"),
     REQUIRED_FIELD("Required Field"),
-    INVALID_FIELD("Invalid field");
+    INVALID_FIELD("Invalid field"),
+    UNAUTHORIZED("Authentication required"),
+    FORBIDDEN("Access denied - Insufficient permissions"),
+    INVALID_TOKEN("Invalid or expired authentication token"),
+    INVALID_ROLE("Invalid user role for this operation");
     
     private final String message;
     
