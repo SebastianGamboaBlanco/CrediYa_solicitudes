@@ -37,6 +37,9 @@ class ApplicationUseCaseTest {
     private static final Integer TERM_MONTHS = 12;
     private static final Integer LOAN_TYPE_ID = 1;
     private static final String USER_EMAIL = "test@example.com";
+    private static final Integer VALID_USER_ROLE_ID = 3;
+    private static final Integer INVALID_USER_ROLE_ID = 2;
+    private static final String AUTHENTICATED_USER_DOCUMENT = "12345678";
 
     @BeforeEach
     void setUp() {
@@ -54,8 +57,8 @@ class ApplicationUseCaseTest {
         when(applicationRepository.create(any(LoanApplication.class)))
                 .thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
-                .expectNext("Pending review")
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
+                .expectNext("Pendiente de revisión")
                 .verifyComplete();
 
         verify(userService).getUserByDocument(IDENTITY_DOCUMENT);
@@ -69,7 +72,7 @@ class ApplicationUseCaseTest {
         when(userService.getUserByDocument(IDENTITY_DOCUMENT))
                 .thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
                 .expectErrorMatches(error ->
                         error instanceof LoanApplicationException &&
                                 ((LoanApplicationException) error).getErrorType() == ErrorType.USER_NOT_FOUND &&
@@ -89,7 +92,7 @@ class ApplicationUseCaseTest {
         when(applicationRepository.existsLoanTypeId(LOAN_TYPE_ID))
                 .thenReturn(Mono.just(false));
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
                 .expectErrorMatches(error ->
                         error instanceof LoanApplicationException &&
                                 ((LoanApplicationException) error).getErrorType() == ErrorType.INVALID_LOAN_TYPE &&
@@ -114,7 +117,7 @@ class ApplicationUseCaseTest {
         when(applicationRepository.create(any(LoanApplication.class)))
                 .thenReturn(Mono.error(repositoryError));
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
                 .expectError(RuntimeException.class)
                 .verify();
 
@@ -130,7 +133,7 @@ class ApplicationUseCaseTest {
         when(userService.getUserByDocument(IDENTITY_DOCUMENT))
                 .thenReturn(Mono.error(serviceError));
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
                 .expectError(RuntimeException.class)
                 .verify();
 
@@ -148,7 +151,7 @@ class ApplicationUseCaseTest {
         when(applicationRepository.existsLoanTypeId(LOAN_TYPE_ID))
                 .thenReturn(Mono.error(validationError));
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
                 .expectError(RuntimeException.class)
                 .verify();
 
@@ -167,10 +170,56 @@ class ApplicationUseCaseTest {
         when(applicationRepository.create(any(LoanApplication.class)))
                 .thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID))
-                .expectNext("Pending review")
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
+                .expectNext("Pendiente de revisión")
                 .verifyComplete();
 
         verify(applicationRepository).create(any(LoanApplication.class));
+    }
+
+    @Test
+    void create_WhenInvalidUserRole_ShouldThrowLoanApplicationException() {
+        // Mock needed because reactive flow continues to userService call
+        when(userService.getUserByDocument(IDENTITY_DOCUMENT))
+                .thenReturn(Mono.just(new User(USER_EMAIL)));
+
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, INVALID_USER_ROLE_ID, AUTHENTICATED_USER_DOCUMENT))
+                .expectErrorMatches(error ->
+                        error instanceof LoanApplicationException &&
+                                ((LoanApplicationException) error).getErrorType() == ErrorType.FORBIDDEN &&
+                                error.getMessage().contains("Client role required")
+                )
+                .verify();
+    }
+
+    @Test
+    void create_WhenNullUserRole_ShouldThrowLoanApplicationException() {
+        // Mock needed because reactive flow continues to userService call
+        when(userService.getUserByDocument(IDENTITY_DOCUMENT))
+                .thenReturn(Mono.just(new User(USER_EMAIL)));
+
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, null, AUTHENTICATED_USER_DOCUMENT))
+                .expectErrorMatches(error ->
+                        error instanceof LoanApplicationException &&
+                                ((LoanApplicationException) error).getErrorType() == ErrorType.FORBIDDEN &&
+                                error.getMessage().contains("Client role required")
+                )
+                .verify();
+    }
+
+    @Test
+    void create_WhenDifferentUserDocuments_ShouldThrowLoanApplicationException() {
+        String differentDocument = "87654321";
+        // Mock needed because reactive flow continues to userService call
+        when(userService.getUserByDocument(IDENTITY_DOCUMENT))
+                .thenReturn(Mono.just(new User(USER_EMAIL)));
+
+        StepVerifier.create(useCase.create(IDENTITY_DOCUMENT, AMOUNT, TERM_MONTHS, LOAN_TYPE_ID, VALID_USER_ROLE_ID, differentDocument))
+                .expectErrorMatches(error ->
+                        error instanceof LoanApplicationException &&
+                                ((LoanApplicationException) error).getErrorType() == ErrorType.FORBIDDEN &&
+                                error.getMessage().contains("Users can only create loan applications for themselves")
+                )
+                .verify();
     }
 }

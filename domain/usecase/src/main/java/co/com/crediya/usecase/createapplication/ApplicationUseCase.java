@@ -26,7 +26,7 @@ public class ApplicationUseCase {
                 .flatMap(user -> validateLoanType(loanTypeId)
                         .then(Mono.just(user)))
                 .flatMap(user -> createLoanApplication(amount, termMonths, user.getEmail(), loanTypeId)
-                        .then(Mono.just("Pending review")));
+                        .then(Mono.just("Pendiente de revisión")));
     }
     
     private Mono<Void> validateUserRole(Integer roleId) {

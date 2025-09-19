@@ -1,5 +1,6 @@
 package co.com.crediya.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class ApplicationResponse {
     
     @Schema(description = "Trace ID for error tracking", 
             example = "550e8400-e29b-41d4-a716-446655440000")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String traceId;
 
     public static ApplicationResponse success(String message) {

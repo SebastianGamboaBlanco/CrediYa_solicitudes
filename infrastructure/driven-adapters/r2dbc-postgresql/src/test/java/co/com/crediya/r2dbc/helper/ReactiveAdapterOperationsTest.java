@@ -31,7 +31,7 @@ class ReactiveAdapterOperationsTest {
 
     @BeforeEach
     void setUp() {
-        repositoryAdapter = new ApplicationRepositoryAdapter(applicationRepository, typeRepository);
+        //repositoryAdapter = new ApplicationRepositoryAdapter(applicationRepository, typeRepository);
     }
 
     @Test
