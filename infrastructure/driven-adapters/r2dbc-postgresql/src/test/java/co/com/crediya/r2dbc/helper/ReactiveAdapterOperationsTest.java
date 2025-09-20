@@ -46,7 +46,7 @@ class ReactiveAdapterOperationsTest {
         );
         
         ApplicationEntity savedEntity = ApplicationEntity.builder()
-                .ApplicationId(1)
+                .applicationId(1)
                 .amount(new BigDecimal("10000"))
                 .termMonths(12)
                 .email("test@example.com")

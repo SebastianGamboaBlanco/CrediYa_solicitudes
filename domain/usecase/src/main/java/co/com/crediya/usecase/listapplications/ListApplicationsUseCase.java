@@ -13,6 +13,7 @@ public class ListApplicationsUseCase {
     private final ApplicationRepository applicationRepository;
 
     private static final List<Integer> ALLOWED_STATUS = Arrays.asList(1, 3, 4);
+    private static final Integer AccessRol = 2;
 
     public ListApplicationsUseCase(ApplicationRepository applicationRepository) {
         this.applicationRepository = applicationRepository;
@@ -26,7 +27,7 @@ public class ListApplicationsUseCase {
     }
 
     private Mono<Void> validateUserRole(Integer roleId) {
-        if (roleId == null || (!roleId.equals(2))) {
+        if (roleId == null || (!roleId.equals(AccessRol))) {
             return Mono.error(new LoanApplicationException(ErrorType.FORBIDDEN,
                     "role not allowed " + roleId));
         }

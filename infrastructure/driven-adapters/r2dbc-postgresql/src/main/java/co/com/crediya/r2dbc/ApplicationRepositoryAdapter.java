@@ -2,6 +2,7 @@ package co.com.crediya.r2dbc;
 
 import co.com.crediya.model.LoanApplication;
 import co.com.crediya.model.PaginatedListApplications;
+import co.com.crediya.model.ApplicationStatusInfo;
 import co.com.crediya.model.gateways.ApplicationRepository;
 import co.com.crediya.r2dbc.helpers.ApplicationMapper;
 import co.com.crediya.r2dbc.helpers.JsonParsingService;
@@ -19,15 +20,18 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
 
     private final ApplicationReactiveRepository applicationReactiveRepository;
     private final TypeReactiveRepository typeReactiveRepository;
+    private final StatusReactiveRepository statusReactiveRepository;
     private final JsonParsingService jsonParsingService;
     private final ApplicationEnrichmentHelper enrichmentHelper;
 
     public ApplicationRepositoryAdapter(ApplicationReactiveRepository applicationReactiveRepository,
                                         TypeReactiveRepository typeReactiveRepository,
+                                        StatusReactiveRepository statusReactiveRepository,
                                         JsonParsingService jsonParsingService,
                                         ApplicationEnrichmentHelper enrichmentHelper) {
         this.applicationReactiveRepository = applicationReactiveRepository;
         this.typeReactiveRepository = typeReactiveRepository;
+        this.statusReactiveRepository = statusReactiveRepository;
         this.jsonParsingService = jsonParsingService;
         this.enrichmentHelper = enrichmentHelper;
         log.info("ApplicationRepositoryAdapter initialized");
@@ -56,5 +60,30 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
                 .flatMap(enrichmentHelper::enrichApplicationsWithUserData);
     }
 
+    @Override
+    @Transactional
+    public Mono<Boolean> existsApplicationId(Integer applicationId) {
+        return applicationReactiveRepository.existsById(applicationId);
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> updateStatus(Integer applicationId, Integer statusId) {
+        return applicationReactiveRepository.updateApplicationStatus(applicationId, statusId);
+    }
+
+    @Override
+    @Transactional
+    public Mono<ApplicationStatusInfo> getApplicationWithStatus(Integer applicationId) {
+        return applicationReactiveRepository.findById(applicationId)
+                .flatMap(application ->
+                    statusReactiveRepository.findById(application.getStatusId())
+                        .map(status -> new ApplicationStatusInfo(
+                                application.getApplicationId(),
+                                application.getEmail(),
+                                status.getName()
+                        ))
+                );
+    }
 
 }

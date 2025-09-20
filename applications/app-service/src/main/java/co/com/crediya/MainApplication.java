@@ -9,10 +9,12 @@ import org.springframework.context.annotation.ComponentScan;
 @ConfigurationPropertiesScan
 @ComponentScan(basePackages = {
         "co.com.crediya.api",
-        "co.com.crediya.r2dbc", 
+        "co.com.crediya.r2dbc",
         "co.com.crediya.restconsumer",
         "co.com.crediya.usecase",
-        "co.com.crediya.config"
+        "co.com.crediya.config",
+        "co.com.crediya.sqs.sender",
+        "co.com.crediya.metrics"
 })
 public class MainApplication {
     public static void main(String[] args) {

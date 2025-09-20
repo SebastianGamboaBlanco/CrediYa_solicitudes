@@ -3,6 +3,7 @@ package co.com.crediya.api;
 import co.com.crediya.api.dto.ApplicationRequest;
 import co.com.crediya.api.dto.ApplicationResponse;
 import co.com.crediya.api.dto.ListApplicationsResponse;
+import co.com.crediya.api.dto.UpdateApplicationStatusRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,6 +21,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -149,11 +151,86 @@ public class RouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/applications/status",
+                    method = RequestMethod.PUT,
+                    beanClass = Handler.class,
+                    beanMethod = "updateApplicationStatus",
+                    operation = @Operation(
+                            operationId = "updateApplicationStatus",
+                            summary = "Update application status",
+                            description = "Updates the status of a loan application to Approved (2) or Rejected (3). Requires admin role.",
+                            tags = {"Applications"},
+                            requestBody = @RequestBody(
+                                    description = "Application status update data",
+                                    required = true,
+                                    content = @Content(
+                                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                            schema = @Schema(implementation = UpdateApplicationStatusRequest.class)
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Application status updated successfully",
+                                            content = @Content(
+                                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                    schema = @Schema(implementation = ApplicationResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Invalid request data or business validation error",
+                                            content = @Content(
+                                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                    schema = @Schema(implementation = ApplicationResponse.class),
+                                                    examples = {
+                                                            @ExampleObject(
+                                                                    name = "InvalidStatus",
+                                                                    value = """
+                                                                            {
+                                                                              "code": 1,
+                                                                              "message": "Invalid status ID. Allowed values: Aprobado o Rechazado. Provided: 5"
+                                                                            }
+                                                                            """
+                                                            )
+                                                    }
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "403",
+                                            description = "Access forbidden - insufficient role permissions",
+                                            content = @Content(
+                                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                    schema = @Schema(implementation = ApplicationResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "404",
+                                            description = "Application not found",
+                                            content = @Content(
+                                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                    schema = @Schema(implementation = ApplicationResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(
+                                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                    schema = @Schema(implementation = ApplicationResponse.class)
+                                            )
+                                    )
+                            }
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/applications")
                 .and(accept(APPLICATION_JSON)), handler::createApplication)
-                .andRoute(GET("/api/v1/applications"), handler::listApplications);
+                .andRoute(GET("/api/v1/applications"), handler::listApplications)
+                .andRoute(PUT("/api/v1/applications/status")
+                        .and(accept(APPLICATION_JSON)), handler::updateApplicationStatus);
     }
 }

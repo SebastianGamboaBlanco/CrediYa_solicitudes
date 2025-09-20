@@ -10,7 +10,9 @@ public enum ErrorType {
     UNAUTHORIZED("Authentication required"),
     FORBIDDEN("Access denied - Insufficient permissions"),
     INVALID_TOKEN("Invalid or expired authentication token"),
-    INVALID_ROLE("Invalid user role for this operation");
+    INVALID_ROLE("Invalid user role for this operation"),
+    INVALID_STATUS("Invalid status value for this operation"),
+    APPLICATION_NOT_FOUND("Application not found");
     
     private final String message;
     

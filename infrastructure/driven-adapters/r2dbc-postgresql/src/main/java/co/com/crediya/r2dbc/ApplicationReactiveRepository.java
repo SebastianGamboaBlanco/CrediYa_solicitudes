@@ -13,4 +13,7 @@ public interface ApplicationReactiveRepository extends ReactiveCrudRepository<Ap
     @Query("SELECT list_applications($1, $2, $3)")
     Mono<String> findApplicationsByStatusIdsWithPagination(Integer[] statusIds, Integer pageNumber, Integer pageSize);
 
+    @Query("UPDATE solicitud SET id_estado = $2 WHERE id_solicitud = $1")
+    Mono<Void> updateApplicationStatus(Integer applicationId, Integer statusId);
+
 }

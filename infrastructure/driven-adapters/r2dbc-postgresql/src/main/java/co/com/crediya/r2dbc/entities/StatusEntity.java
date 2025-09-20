@@ -8,31 +8,17 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table("solicitud")
-public class ApplicationEntity {
-    
+@Table("estados")
+public class StatusEntity {
+
     @Id
-    @Column("id_solicitud")
-    private Integer applicationId;
-    
-    @Column("monto")
-    private BigDecimal amount;
-    
-    @Column("plazo")
-    private Integer termMonths;
-    
-    @Column("email")
-    private String email;
-    
     @Column("id_estado")
     private Integer statusId;
-    
-    @Column("id_tipo_prestamo")
-    private Integer typeId;
+
+    @Column("nombre")
+    private String name;
 }
