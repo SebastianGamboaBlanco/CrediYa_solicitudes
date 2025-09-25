@@ -47,6 +47,5 @@ cors:
   allowed-origins: "http://localhost:4200,http://localhost:8081"
 adapter:
   sqs:
-    region: "us-east-1"
-    queueUrl: "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/crediya-solicitudes-queue.fifo"
-    endpoint: "http://localhost:4566"
+    region: "${AWS_REGION:us-east-1}"
+    queueUrl: "${SQS_QUEUE_URL:https://sqs.us-east-1.amazonaws.com/728037583254/crediYa-notificaciones.fifo}"
